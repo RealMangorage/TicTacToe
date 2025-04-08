@@ -52,6 +52,7 @@ public final class BoardFrame extends JFrame {
                 """
         );
         scoreLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        scoreLabel.setEditable(false);
 
         // Status
         statusLabel = new JLabel("(O) Player", SwingConstants.CENTER);

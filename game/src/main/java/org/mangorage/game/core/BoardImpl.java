@@ -111,7 +111,7 @@ public final class BoardImpl implements Board {
         if (isGameOver()) {
             new Thread(() -> {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(5000);
                 } catch (InterruptedException ignored) {}
                 Main.setActiveBoard(playerSet.swap());
             }).start();
