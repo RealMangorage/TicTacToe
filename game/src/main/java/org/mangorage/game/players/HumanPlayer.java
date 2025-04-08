@@ -1,7 +1,6 @@
 package org.mangorage.game.players;
 
 import org.mangorage.game.api.Board;
-import org.mangorage.game.core.BoardImpl;
 import org.mangorage.game.frame.BoardFrame;
 
 public final class HumanPlayer implements Player {

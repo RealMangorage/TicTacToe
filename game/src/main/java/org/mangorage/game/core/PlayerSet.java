@@ -1,7 +1,6 @@
 package org.mangorage.game.core;
 
 import org.mangorage.game.players.Player;
-
 import java.util.List;
 
 public final class PlayerSet {

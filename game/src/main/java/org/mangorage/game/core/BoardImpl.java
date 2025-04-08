@@ -54,14 +54,6 @@ public final class BoardImpl implements Board {
         return boardRepresentation;
     }
 
-    private int getPlayerId(Player player) {
-        return playerSet.getPlayerId(player);
-    }
-
-    private String getSymbol(int id) {
-        return playerSet.getPlayerSymbolById(id);
-    }
-
     public Player getPlayerById(int playerId) {
         return playerSet.getPlayerById(playerId);
     }

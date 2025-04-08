@@ -1,8 +1,6 @@
 package org.mangorage.game.players;
 
 import org.mangorage.game.api.Board;
-import org.mangorage.game.core.BoardImpl;
-
 import java.util.ArrayList;
 import java.util.List;
 

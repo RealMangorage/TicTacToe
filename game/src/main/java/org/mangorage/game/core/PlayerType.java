@@ -57,8 +57,8 @@ public final class PlayerType {
 
         var classes = reflections.getTypesAnnotatedWith(Mod.class);
 
+        // un freeze it, so we can register new player types!
         frozen = false;
-
 
         classes.forEach(clz -> {
             try {
@@ -72,7 +72,7 @@ public final class PlayerType {
         register("player", HumanPlayer::new);
         register("computer", BasicAiPlayer::new);
 
-
+        // Finish up loading PlayerTypes, no more need for registering...
         frozen = true;
         loaded = true;
     }
