@@ -12,6 +12,7 @@ import org.mangorage.game.api.Result;
 
 import org.mangorage.game.players.Player;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,10 +25,14 @@ public final class ChatGPTPlayer implements Player {
     private static final String API_KEY;
 
     static {
-        try {
-            API_KEY = Files.readString(Path.of("cfg/api_key_openai.txt"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (Files.exists(ChatGPTMod.CONFIG)) {
+            try {
+                API_KEY = Files.readString(Path.of("cfg/api_key_openai.txt"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            API_KEY = null;
         }
     }
 
@@ -36,12 +41,17 @@ public final class ChatGPTPlayer implements Player {
     private final String name;
     public ChatGPTPlayer(String name) {
         this.name = name;
-        this.openAI = OpenAI.newBuilder(API_KEY)
+        this.openAI = API_KEY == null ? null : OpenAI.newBuilder(API_KEY)
                 .build();
     }
 
     @Override
     public void commitTurn(Board board) {
+        if (openAI == null) {
+            System.out.println("ERROR: API KEY NOT SET!");
+            return;
+        }
+
         var boardState = board.getBoard();
         var symbol = board.getActivePlayerSymbol();
 
