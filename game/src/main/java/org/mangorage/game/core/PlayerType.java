@@ -5,6 +5,7 @@ import org.mangorage.game.players.BasicAiPlayer;
 import org.mangorage.game.players.HumanPlayer;
 import org.mangorage.game.players.Player;
 import org.reflections.Reflections;
+import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 
 import java.io.File;
@@ -45,13 +46,14 @@ public final class PlayerType {
 
         final Reflections reflections = new Reflections(
                 ConfigurationBuilder.build()
-                        .setClassLoaders(
-                                new ClassLoader[]{
-                                        playerClassloader
-                                }
+                        .addClassLoaders(
+                                playerClassloader
                         )
-                        .setUrls(
+                        .addUrls(
                                 getFilesInFolder("players")
+                        )
+                        .addUrls(
+                                ClasspathHelper.forJavaClassPath()
                         )
         );
 
@@ -67,10 +69,6 @@ public final class PlayerType {
                 throw new RuntimeException(e);
             }
         });
-
-        // Default
-        register("player", HumanPlayer::new);
-        register("computer", BasicAiPlayer::new);
 
         // Finish up loading PlayerTypes, no more need for registering...
         frozen = true;
