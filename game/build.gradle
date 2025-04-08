@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+
+group = 'org.mangorage'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.reflections:reflections:0.10.2'
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'org.mangorage.game.Main' // replace with your real class path
+        )
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('') // Removes '-all' suffix; now it's just yourapp.jar
+}
