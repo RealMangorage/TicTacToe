@@ -1,6 +1,7 @@
 package org.mangorage.game;
 
 import org.mangorage.game.core.PlayerType;
+
 import javax.swing.*;
 
 public final class Main {
