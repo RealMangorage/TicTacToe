@@ -1,8 +1,10 @@
 package org.mangorage.game.frame;
 
+import org.mangorage.game.Game;
 import org.mangorage.game.Main;
 import org.mangorage.game.core.PlayerSet;
 import org.mangorage.game.core.PlayerType;
+import org.mangorage.game.core.Scoreboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -82,15 +84,19 @@ public class MenuFrame extends JFrame {
         System.out.println("Player 1: " + playerA.name() + " (" + playerA.type() + ")");
         System.out.println("Player 2: " + playerB.name() + " (" + playerB.type() + ")");
 
+        Scoreboard.INSTANCE.clear();
+
+        Game.getPlayerSet()
+                .resetPlayers(
+                        playerA.type().create(playerA.name()),
+                        playerB.type().create(playerB.name())
+                );
+
+        Game.getBoard().startNewGame();
+
         SwingUtilities.invokeLater(() -> {
             setVisible(false);
             showGameFrame.run();
-            Main.setActiveBoard(
-                    new PlayerSet(
-                            playerA.type().create(playerA.name()),
-                            playerB.type().create(playerB.name())
-                    )
-            );
         });
     }
 }

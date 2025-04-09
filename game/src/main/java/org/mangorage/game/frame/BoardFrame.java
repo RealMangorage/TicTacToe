@@ -1,16 +1,18 @@
 package org.mangorage.game.frame;
 
-import org.mangorage.game.Main;
+import org.mangorage.game.Game;
 import org.mangorage.game.core.BoardImpl;
 import org.mangorage.game.core.Scoreboard;
 import org.mangorage.game.players.HumanPlayer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public final class BoardFrame extends JFrame {
+public final class BoardFrame extends JFrame implements KeyListener {
     private final JTextArea scoreLabel;
     private final JLabel statusLabel;
     private final JPanel gridPanel;  // Panel to hold the Tic-Tac-Toe grid
@@ -21,6 +23,8 @@ public final class BoardFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
+        setFocusable(true);
+        addKeyListener(this);
 
         // Panel to hold the Tic-Tac-Toe grid
         gridPanel = new JPanel();
@@ -93,7 +97,7 @@ public final class BoardFrame extends JFrame {
 
     // Handle when a player clicks on a cell
     private void onCellClicked(int index) {
-        var gameBoard = Main.getActiveBoard();
+        var gameBoard = Game.getBoard();
         if (gameBoard.getActivePlayer() instanceof HumanPlayer humanPlayer) {
             gameBoard.setPosition(humanPlayer, index);
         }
@@ -129,5 +133,24 @@ public final class BoardFrame extends JFrame {
         });
 
         scoreLabel.setText(builder.toString());
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_F5) {
+            setVisible(false);
+            Game.getBoard().endGame();
+            Game.getMenuFrame().setVisible(true);
+        }
     }
 }

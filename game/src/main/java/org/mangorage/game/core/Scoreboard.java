@@ -39,4 +39,9 @@ public final class Scoreboard {
     public int getTotalGames() {
         return totalGames;
     }
+
+    public void clear() {
+        score.clear();
+        totalGames = 0;
+    }
 }

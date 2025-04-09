@@ -5,11 +5,11 @@ import java.util.List;
 
 public final class PlayerSet {
 
-    private final List<Player> players;
-    private final Player playerA;
-    private final Player playerB;
+    private volatile List<Player> players;
+    private volatile Player playerA;
+    private volatile Player playerB;
 
-    private Player currentPlayer;
+    private volatile Player currentPlayer;
 
     public PlayerSet(Player playerA, Player playerB) {
         this.players = List.of(playerA, playerB);
@@ -65,7 +65,18 @@ public final class PlayerSet {
         return players;
     }
 
-    public PlayerSet swap() {
-        return new PlayerSet(playerB, playerA);
+    public void swap() {
+        var plrA = playerA;
+
+        this.playerA = playerB;
+        this.playerB = plrA;
+    }
+
+    public void resetPlayers(Player playerA, Player playerB) {
+        this.players = List.of(playerA, playerB);
+        this.playerA = playerA;
+        this.playerB = playerB;
+
+        this.currentPlayer = playerA;
     }
 }

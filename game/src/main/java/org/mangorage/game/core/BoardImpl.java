@@ -1,27 +1,20 @@
 package org.mangorage.game.core;
 
-import org.mangorage.game.Main;
+import org.mangorage.game.Game;
 import org.mangorage.game.api.Board;
 import org.mangorage.game.api.Result;
-import org.mangorage.game.frame.BoardFrame;
 import org.mangorage.game.players.Player;
 
+import java.util.Arrays;
+
 public final class BoardImpl implements Board {
-    private final BoardFrame frame;
-    private final PlayerSet playerSet;
     private final int[] board;
 
-    private boolean gameOver = false;
+    private boolean gameOver = true;
     private String finalMessage = null;
 
-    public BoardImpl(BoardFrame frame, PlayerSet playerSet) {
-        this.frame = frame;
-        this.playerSet = playerSet;
+    public BoardImpl() {
         this.board = new int[9];
-
-        // Let the player know his turn is up!
-        // More useful for notifications (Atleast for human players)
-        getActivePlayer().commitTurn(this);
     }
 
     public boolean isGameOver() {
@@ -47,7 +40,7 @@ public final class BoardImpl implements Board {
                 boardRepresentation[i] = ""; // Empty space
             } else {
                 // Lookup the symbol for the player using the player ID
-                boardRepresentation[i] = playerSet.getPlayerSymbolById(playerId);
+                boardRepresentation[i] = Game.getPlayerSet().getPlayerSymbolById(playerId);
             }
         }
 
@@ -55,24 +48,24 @@ public final class BoardImpl implements Board {
     }
 
     public Player getPlayerById(int playerId) {
-        return playerSet.getPlayerById(playerId);
+        return Game.getPlayerSet().getPlayerById(playerId);
     }
 
     public String getActivePlayerSymbol() {
-        return playerSet.getActiveSymbol();
+        return Game.getPlayerSet().getActiveSymbol();
     }
 
     public Player getActivePlayer() {
-        return playerSet.getActivePlayer();
+        return Game.getPlayerSet().getActivePlayer();
     }
 
     public Result setPosition(Player player, int position) {
         if (isGameOver()) return Result.GAME_OVER;
-        if (playerSet.getActivePlayer() == player) {
+        if (Game.getPlayerSet().getActivePlayer() == player) {
             if (board[position] != 0) return Result.TRY_AGAIN;
-            board[position] = playerSet.getPlayerId(player);
+            board[position] = Game.getPlayerSet().getPlayerId(player);
 
-            playerSet.nextPlayer();
+            Game.getPlayerSet().nextPlayer();
 
             // Update everything
             update(true);
@@ -87,6 +80,25 @@ public final class BoardImpl implements Board {
         return Result.FAILED;
     }
 
+    public void startNewGame() {
+        if (gameOver) {
+            Arrays.fill(this.board, 0);
+
+            // Let the player know his turn is up!
+            // More useful for notifications (Atleast for human players)
+            Game.getPlayerSet().getAll().forEach(Scoreboard.INSTANCE::prepareScore);
+
+            this.gameOver = false;
+
+            Game.getGameFrame().update(this);
+            getActivePlayer().commitTurn(this);
+        }
+    }
+
+    public void endGame() {
+        this.gameOver = true;
+    }
+
     public void update(boolean checkWinner) {
         if (isGameOver()) return;
         if (checkWinner) {
@@ -97,15 +109,15 @@ public final class BoardImpl implements Board {
                 Scoreboard.INSTANCE.incrementGameCount();
         }
 
-        playerSet.updateAll(this);
-        frame.update(this);
+        Game.getPlayerSet().updateAll(this);
+        Game.getGameFrame().update(this);
 
         if (isGameOver()) {
             new Thread(() -> {
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException ignored) {}
-                Main.setActiveBoard(playerSet.swap());
+                startNewGame();
             }).start();
         }
     }
