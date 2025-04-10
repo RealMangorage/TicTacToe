@@ -1,5 +1,6 @@
 package org.mangorage.game.core;
 
+import org.mangorage.game.TicTacToeMod;
 import org.mangorage.game.api.Mod;
 import org.mangorage.game.players.BasicAiPlayer;
 import org.mangorage.game.players.HumanPlayer;
@@ -52,9 +53,6 @@ public final class PlayerType {
                         .addUrls(
                                 getFilesInFolder("players")
                         )
-                        .addUrls(
-                                ClasspathHelper.forJavaClassPath()
-                        )
         );
 
         var classes = reflections.getTypesAnnotatedWith(Mod.class);
@@ -69,6 +67,8 @@ public final class PlayerType {
                 throw new RuntimeException(e);
             }
         });
+
+        new TicTacToeMod(); // Manually load this one!
 
         // Finish up loading PlayerTypes, no more need for registering...
         frozen = true;
