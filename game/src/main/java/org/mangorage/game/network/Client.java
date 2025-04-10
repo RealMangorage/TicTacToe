@@ -1,10 +1,14 @@
 package org.mangorage.game.network;
-
 import java.io.*;
 import java.net.*;
 
 public class Client {
     public static void main(String[] args) {
+
+
+
+
+
         String host = "localhost"; // Change this if you’re networking across the void
         int port = 12345;
 

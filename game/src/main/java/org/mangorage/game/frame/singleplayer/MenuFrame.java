@@ -1,8 +1,6 @@
-package org.mangorage.game.frame;
+package org.mangorage.game.frame.singleplayer;
 
 import org.mangorage.game.Game;
-import org.mangorage.game.Main;
-import org.mangorage.game.core.PlayerSet;
 import org.mangorage.game.core.PlayerType;
 import org.mangorage.game.core.Scoreboard;
 

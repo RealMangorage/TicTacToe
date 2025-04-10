@@ -1,7 +1,9 @@
 package org.mangorage.game.network;
 
+import org.mangorage.game.network.core.SmartByteBuf;
 import org.mangorage.game.players.RemotePlayer;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -11,6 +13,7 @@ public class Server {
     public static final int PORT = 12345;
     private static final RemotePlayer.Properties PROPERTIES = new RemotePlayer.Properties();
     public static final RemotePlayer REMOTE_PLAYER = new RemotePlayer(PROPERTIES);
+    private static final Logger log = LoggerFactory.getLogger(Server.class);
 
     public static void initServer() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
@@ -30,5 +33,19 @@ public class Server {
         } catch (IOException e) {
             System.err.println("You broke it: " + e.getMessage());
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+
+        SmartByteBuf buf = SmartByteBuf.create();
+        buf.write("Hello!");
+        buf.write("Hello 2!");
+        System.out.println(
+                buf.readString()
+        );
+        System.out.println(
+                buf.readString()
+        );
+
     }
 }

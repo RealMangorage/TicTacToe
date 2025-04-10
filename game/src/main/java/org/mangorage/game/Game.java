@@ -2,8 +2,8 @@ package org.mangorage.game;
 
 import org.mangorage.game.core.BoardImpl;
 import org.mangorage.game.core.PlayerSet;
-import org.mangorage.game.frame.BoardFrame;
-import org.mangorage.game.frame.MenuFrame;
+import org.mangorage.game.frame.singleplayer.BoardFrame;
+import org.mangorage.game.frame.singleplayer.MenuFrame;
 import org.mangorage.game.players.HumanPlayer;
 
 

@@ -1,4 +1,4 @@
-package org.mangorage.game.frame;
+package org.mangorage.game.frame.multiplayer;
 
 /**
  * Used for when we are connecting to a server

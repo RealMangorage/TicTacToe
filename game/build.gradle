@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'org.javamodularity.moduleplugin' version '1.8.15'
 }
 
 
@@ -13,6 +14,7 @@ repositories {
 
 dependencies {
     implementation 'org.reflections:reflections:0.10.2'
+    implementation("io.netty:netty-buffer:5.0.0.Alpha2")
 }
 
 jar {

@@ -1,7 +1,7 @@
 package org.mangorage.game.players;
 
 import org.mangorage.game.api.Board;
-import org.mangorage.game.frame.BoardFrame;
+import org.mangorage.game.frame.singleplayer.BoardFrame;
 
 public final class HumanPlayer implements Player {
     private final String name;

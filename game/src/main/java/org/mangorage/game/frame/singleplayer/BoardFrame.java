@@ -1,4 +1,4 @@
-package org.mangorage.game.frame;
+package org.mangorage.game.frame.singleplayer;
 
 import org.mangorage.game.Game;
 import org.mangorage.game.core.BoardImpl;
