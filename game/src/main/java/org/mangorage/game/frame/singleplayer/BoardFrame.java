@@ -150,7 +150,7 @@ public final class BoardFrame extends JFrame implements KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_F5) {
             setVisible(false);
             Game.getBoard().endGame();
-            Game.getMenuFrame().setVisible(true);
+            Game.getMainMenuFrame().setVisible(true);
         }
     }
 }

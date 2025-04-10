@@ -11,15 +11,13 @@ public class MenuFrame extends JFrame {
 
     private record Profile(PlayerType type, String name) {}
 
-    private final Runnable showGameFrame;
     private final JComboBox<PlayerType> comboBox1;
     private final JComboBox<PlayerType> comboBox2;
     private final JTextField textField1;
     private final JTextField textField2;
 
-    public MenuFrame(Runnable showGameFrame) {
-        this.showGameFrame = showGameFrame;
-        setTitle("Tic Tac Toe Main Menu");
+    public MenuFrame() {
+        setTitle("Tic Tac Toe Player Select");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(450, 300);
         setLocationRelativeTo(null); // Center on screen
@@ -73,7 +71,6 @@ public class MenuFrame extends JFrame {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
-        setVisible(true);
     }
 
     // Your majestic game starter
@@ -94,7 +91,7 @@ public class MenuFrame extends JFrame {
 
         SwingUtilities.invokeLater(() -> {
             setVisible(false);
-            showGameFrame.run();
+            Game.getGameFrame().setVisible(true);
         });
     }
 }

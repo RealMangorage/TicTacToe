@@ -12,7 +12,7 @@ public final class Main {
 
         SwingUtilities.invokeLater(() -> {
             Game.init();
-            Game.getMenuFrame().setVisible(true);
+            Game.getMainMenuFrame().setVisible(true);
         });
     }
 }
