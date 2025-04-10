@@ -2,8 +2,6 @@ package org.mangorage.game.network;
 
 import org.mangorage.game.network.core.SmartByteBuf;
 import org.mangorage.game.players.RemotePlayer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -13,7 +11,6 @@ public class Server {
     public static final int PORT = 12345;
     private static final RemotePlayer.Properties PROPERTIES = new RemotePlayer.Properties();
     public static final RemotePlayer REMOTE_PLAYER = new RemotePlayer(PROPERTIES);
-    private static final Logger log = LoggerFactory.getLogger(Server.class);
 
     public static void initServer() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {

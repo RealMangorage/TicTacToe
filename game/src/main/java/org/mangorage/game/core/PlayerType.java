@@ -1,18 +1,18 @@
 package org.mangorage.game.core;
 
-import org.mangorage.game.TicTacToeMod;
 import org.mangorage.game.api.Mod;
-import org.mangorage.game.players.BasicAiPlayer;
-import org.mangorage.game.players.HumanPlayer;
 import org.mangorage.game.players.Player;
-import org.reflections.Reflections;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
+import org.mangorage.scanner.api.Scanner;
+import org.mangorage.scanner.api.ScannerBuilder;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -41,65 +41,55 @@ public final class PlayerType {
     public static void init() {
         if (loaded) return;
 
+        var playerJars = getFilesInFolder(Path.of("players"));
+
         URLClassLoader playerClassloader = new URLClassLoader(
-                getFilesInFolder("players")
+                playerJars
+                        .stream()
+                        .map(
+                                p -> {
+                                    try {
+                                        return p.toUri().toURL();
+                                    } catch (MalformedURLException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                        )
+                        .toArray(URL[]::new)
         );
 
-        final Reflections reflections = new Reflections(
-                ConfigurationBuilder.build()
-                        .addClassLoaders(
-                                playerClassloader
-                        )
-                        .addUrls(
-                                getFilesInFolder("players")
-                        )
-        );
+        var classpath = System.getProperty("java.class.path");
+        var paths = Arrays.stream(classpath.split("\\;"))
+                .map(Path::of)
+                .toList();
 
-        var classes = reflections.getTypesAnnotatedWith(Mod.class);
+        Scanner scanner = new ScannerBuilder()
+                .addPath(paths)
+                .addPath(playerClassloader, playerJars)
+                .build();
 
-        // un freeze it, so we can register new player types!
         frozen = false;
-
-        classes.forEach(clz -> {
+        scanner.findClassesWithAnnotation(Mod.class).forEach(clz -> {
+            System.out.println(clz);
             try {
                 clz.getConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         });
-
-        new TicTacToeMod(); // Manually load this one!
 
         // Finish up loading PlayerTypes, no more need for registering...
         frozen = true;
         loaded = true;
     }
 
-    public static URL[] getFilesInFolder(String folderPath) {
-        List<URL> urlList = new ArrayList<>();
-        File folder = new File(folderPath);
+    @SuppressWarnings("all")
+    public static List<Path> getFilesInFolder(Path folderPath) {
+        if (!Files.isDirectory(folderPath) || !Files.exists(folderPath)) return List.of();
 
-        // Check if the folder exists and is actually a directory
-        if (folder.exists() && folder.isDirectory()) {
-            File[] fileArray = folder.listFiles();
-
-            if (fileArray != null) {
-                for (File file : fileArray) {
-                    try {
-                        // Convert each file to URL and add to the list
-                        urlList.add(file.toURI().toURL());
-                    } catch (Exception e) {
-                        System.err.println("Error converting file to URL: " + file.getAbsolutePath());
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } else {
-            System.out.println("Provided path is not a valid folder.");
-        }
-
-        // Convert the list to URL[] array and return it
-        return urlList.toArray(new URL[0]);
+        return Arrays.stream(folderPath.toFile().listFiles())
+                .map(File::toPath)
+                .toList();
     }
 
     private final String id;

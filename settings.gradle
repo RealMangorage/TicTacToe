@@ -2,4 +2,7 @@ rootProject.name = 'tictactoe'
 include 'examplemod'
 include 'game'
 include 'chatgptplayer'
+include 'scanner'
+include 'buffer'
+include 'buffer'
 
