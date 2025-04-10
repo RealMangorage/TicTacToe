@@ -15,7 +15,9 @@ import org.mangorage.game.Game;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
 
 public class MainMenuFrame extends JFrame {
 
@@ -28,41 +30,61 @@ public class MainMenuFrame extends JFrame {
         setLayout(new BorderLayout());
         setResizable(false);
 
-        // Top label
+        // ===== Top Panel =====
         JLabel titleLabel = new JLabel("TicTacToe", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel footerLabel = new JLabel("Made by MangoRage!", SwingConstants.CENTER);
         footerLabel.setFont(new Font("Arial", Font.ITALIC, 12));
-
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         footerLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Create a panel to hold both the title and the spacer
         JPanel topPanel = new JPanel();
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));;
-        topPanel.add(titleLabel, BorderLayout.NORTH);
-        topPanel.add(Box.createVerticalStrut(10)); // Add space between the title and footer
-        topPanel.add(footerLabel, BorderLayout.NORTH);
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.add(titleLabel);
+        topPanel.add(Box.createVerticalStrut(10));
+        topPanel.add(footerLabel);
+        topPanel.add(Box.createVerticalStrut(50)); // Spacer between footer and buttons
 
-        // Add a JPanel for extra space between the title and buttons
-        JPanel topSpacer = new JPanel();
-        topSpacer.setPreferredSize(new Dimension(400, 50)); // Adjust height to your liking
-        topPanel.add(topSpacer, BorderLayout.CENTER);
-
-        // Add the topPanel to the NORTH section of the BorderLayout
         add(topPanel, BorderLayout.NORTH);
 
-        // Center buttons
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(4, 1, 10, 10));
-
+        // ===== Center Button Panel =====
+        JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 10, 10));
         buttonPanel.add(createButton("Single Player", e -> handleSinglePlayer()));
         buttonPanel.add(createButton("Host (W.I.P)", e -> handleHost()));
         buttonPanel.add(createButton("Join (W.I.P)", e -> handleJoin()));
         buttonPanel.add(createButton("Exit Game", e -> System.exit(0)));
 
         add(buttonPanel, BorderLayout.CENTER);
+
+        // ===== Bottom Icon Panel =====
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        bottomPanel.add(createIconButton("assets/discord.png", e -> openLink("https://discord.mangorage.org/")));
+        bottomPanel.add(createIconButton("assets/github.png", e -> openLink("https://github.com/RealMangorage/TicTacToe")));
+
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    private ImageIcon createIcon(String path) {
+        return new ImageIcon(MainMenuFrame.class.getClassLoader().getResource(path));
+    }
+
+    private ImageIcon resizeIcon(ImageIcon icon, int width, int height) {
+        Image img = icon.getImage();
+        Image resizedImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new ImageIcon(resizedImg);
+    }
+
+    private JButton createIconButton(String path, ActionListener event) {
+        ImageIcon icon = resizeIcon(createIcon(path), 32, 32);
+        JButton button = new JButton(icon);
+
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setPreferredSize(new Dimension(32, 32));
+        button.addActionListener(event);
+
+        return button;
     }
 
     private JButton createButton(String text, ActionListener listener) {
@@ -123,4 +145,14 @@ public class MainMenuFrame extends JFrame {
         System.out.println("Join selected");
     }
 
+    private void openLink(String url) {
+        try {
+            URI uri = new URI(url);
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(uri);
+            } else {
+                throw new UnsupportedOperationException("Desktop doesn't support browsing, your setup is from the stone age.");
+            }
+        } catch (Exception ignored) {}
+    }
 }
