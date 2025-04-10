@@ -1,8 +1,13 @@
 rootProject.name = 'tictactoe'
-include 'examplemod'
+
 include 'game'
-include 'chatgptplayer'
-include 'scanner'
-include 'buffer'
-include 'buffer'
+
+
+include 'libraries'
+include 'libraries:scanner'
+include 'libraries:buffer'
+
+include 'mods'
+include 'mods:chatgptplayer'
+include 'mods:examplemod'
 

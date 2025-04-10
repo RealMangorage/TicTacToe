@@ -13,8 +13,8 @@ repositories {
 }
 
 dependencies {
-    implementation project(":scanner")
-    implementation project(":buffer")
+    implementation project(":libraries:scanner")
+    implementation project(":libraries:buffer")
 }
 
 jar {
