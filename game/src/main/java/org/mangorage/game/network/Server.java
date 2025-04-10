@@ -1,6 +1,6 @@
 package org.mangorage.game.network;
 
-import org.mangorage.game.network.core.SmartByteBuf;
+import org.mangorage.buffer.api.SimpleByteBuf;
 import org.mangorage.game.players.RemotePlayer;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -34,9 +34,9 @@ public class Server {
 
     public static void main(String[] args) throws IOException {
 
-        SmartByteBuf buf = SmartByteBuf.create();
-        buf.write("Hello!");
-        buf.write("Hello 2!");
+        var buf = new SimpleByteBuf();
+        buf.writeString("Hello!");
+        buf.writeString("Hello 2!");
         System.out.println(
                 buf.readString()
         );

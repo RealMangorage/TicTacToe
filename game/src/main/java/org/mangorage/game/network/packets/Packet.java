@@ -1,10 +1,10 @@
 package org.mangorage.game.network.packets;
 
-import org.mangorage.game.network.core.SmartByteBuf;
+import org.mangorage.buffer.api.SimpleByteBuf;
 
 public interface Packet {
-    void encode(SmartByteBuf buffer);
+    void encode(SimpleByteBuf buffer);
     void handle();
 
-    PacketId getId();
+    PacketId<?> getId();
 }

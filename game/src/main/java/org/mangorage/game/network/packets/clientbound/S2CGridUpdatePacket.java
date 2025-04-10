@@ -1,7 +1,7 @@
 package org.mangorage.game.network.packets.clientbound;
 
 
-import org.mangorage.game.network.core.SmartByteBuf;
+import org.mangorage.buffer.api.SimpleByteBuf;
 import org.mangorage.game.network.packets.Packet;
 import org.mangorage.game.network.packets.PacketId;
 
@@ -10,7 +10,7 @@ public final class S2CGridUpdatePacket implements Packet {
     public static final PacketId<S2CGridUpdatePacket> ID = new PacketId<>();
 
 
-    public static S2CGridUpdatePacket decode(SmartByteBuf buf) {
+    public static S2CGridUpdatePacket decode(SimpleByteBuf buf) {
         return new S2CGridUpdatePacket(buf.readIntArray(), buf.readString(), buf.readString());
     }
 
@@ -25,10 +25,10 @@ public final class S2CGridUpdatePacket implements Packet {
     }
 
     @Override
-    public void encode(SmartByteBuf buffer) {
+    public void encode(SimpleByteBuf buffer) {
         buffer.writeIntArray(grid);
-        buffer.write(scoresMessage);
-        buffer.write(statusMessage);
+        buffer.writeString(scoresMessage);
+        buffer.writeString(statusMessage);
     }
 
     @Override

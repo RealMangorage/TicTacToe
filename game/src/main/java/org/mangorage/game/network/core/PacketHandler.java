@@ -1,5 +1,6 @@
 package org.mangorage.game.network.core;
 
+import org.mangorage.buffer.api.SimpleByteBuf;
 import org.mangorage.game.network.packets.Packet;
 import org.mangorage.game.network.packets.PacketId;
 import org.mangorage.game.network.packets.clientbound.S2CCommitTurnPacket;
@@ -23,29 +24,29 @@ public final class PacketHandler {
     private final Map<PacketId<?>, RegisteredPacket> idByPacketId = new HashMap<>();
     private int id = 0;
 
-    private record RegisteredPacket(int id, Direction direction, Function<SmartByteBuf, ? extends Packet> decoder) {}
+    private record RegisteredPacket(int id, Direction direction, Function<SimpleByteBuf, ? extends Packet> decoder) {}
     
     PacketHandler() {}
     
-    <T extends Packet> PacketHandler register(PacketId<T> packetId, Direction direction, Function<SmartByteBuf, T> decoder) {
+    <T extends Packet> PacketHandler register(PacketId<T> packetId, Direction direction, Function<SimpleByteBuf, T> decoder) {
         idByPacketId.put(packetId, new RegisteredPacket(id, direction, decoder));
         packetIdById.put(id, packetId);
         id++;
         return this;
     }
 
-    public SmartByteBuf encodePacket(Packet packet) {
+    public SimpleByteBuf encodePacket(Packet packet) {
         var id = idByPacketId.get(packet.getId());
         if (id == null) throw new IllegalStateException("Packet %s is not registered...".formatted(packet.getClass()));
 
-        SmartByteBuf buf = SmartByteBuf.create();
-        buf.write(id.id());
+        var buf = new SimpleByteBuf();
+        buf.writeInt(id.id());
         packet.encode(buf);
 
         return buf;
     }
     
-    public Optional<Packet> decodePacket(SmartByteBuf smartByteBuf) {
+    public Optional<Packet> decodePacket(SimpleByteBuf smartByteBuf) {
         try {
             var intId = smartByteBuf.readInt();
             var packetId = packetIdById.get(intId);
