@@ -26,14 +26,4 @@ jar {
 }
 
 shadowJar {
-    archiveClassifier.set('') // Removes '-all' suffix; now it's just yourapp.jar
-
-
-    exclude { file ->
-        file.name.contains('nonapi')
-    }
-
-
-
-    minimize()
 }

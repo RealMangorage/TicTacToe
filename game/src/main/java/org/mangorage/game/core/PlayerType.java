@@ -4,8 +4,6 @@ import org.mangorage.game.api.Mod;
 import org.mangorage.game.players.Player;
 import org.mangorage.scanner.api.Scanner;
 import org.mangorage.scanner.api.ScannerBuilder;
-
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -41,39 +39,20 @@ public final class PlayerType {
     public static void init() {
         if (loaded) return;
 
-        var playerJars = getFilesInFolder(Path.of("players"));
+        URLClassLoader playerClassloader = new URLClassLoader(getFilesInFolder(Path.of("players")));
 
-        URLClassLoader playerClassloader = new URLClassLoader(
-                playerJars
-                        .stream()
-                        .map(
-                                p -> {
-                                    try {
-                                        return p.toUri().toURL();
-                                    } catch (MalformedURLException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }
-                        )
-                        .toArray(URL[]::new)
-        );
-
-        var classpath = System.getProperty("java.class.path");
-        var paths = Arrays.stream(classpath.split("\\;"))
-                .map(Path::of)
-                .toList();
-
-        Scanner scanner = new ScannerBuilder()
-                .addPath(paths)
-                .addPath(playerClassloader, playerJars)
+        Scanner scanner = ScannerBuilder.of()
+                .addClasspath(PlayerType.class.getClassLoader())
+                .addClassloader(playerClassloader)
                 .build();
 
+        scanner.commitScan();
+
         frozen = false;
-        scanner.findClassesWithAnnotation(Mod.class).forEach(clz -> {
-            System.out.println(clz);
+        scanner.findClassesWithPredicate(clz -> clz.isAnnotationPresent(Mod.class)).forEach(clz -> {
             try {
                 clz.getConstructor().newInstance();
-            } catch (ReflectiveOperationException e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
         });
@@ -84,12 +63,17 @@ public final class PlayerType {
     }
 
     @SuppressWarnings("all")
-    public static List<Path> getFilesInFolder(Path folderPath) {
-        if (!Files.isDirectory(folderPath) || !Files.exists(folderPath)) return List.of();
-
+    public static URL[] getFilesInFolder(Path folderPath) {
+        if (!Files.isDirectory(folderPath)) return new URL[]{};
         return Arrays.stream(folderPath.toFile().listFiles())
-                .map(File::toPath)
-                .toList();
+                .map(file -> {
+                    try {
+                        return file.toURI().toURL();
+                    } catch (MalformedURLException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .toArray(URL[]::new);
     }
 
     private final String id;

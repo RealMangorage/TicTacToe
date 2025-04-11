@@ -1,10 +1,8 @@
 package org.mangorage.scanner.internal;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -12,74 +10,65 @@ import java.util.zip.ZipFile;
 
 public final class ScannerUtil {
 
-    public static List<Class<?>> scanPath(Path path, ClassLoader classLoader) {
+    static void scanPath(final List<Class<?>> classes, final Path path, final ClassLoader classLoader) {
         if (Files.isDirectory(path)) {
-            return scanDirectoryForClasses(path, classLoader);
+            scanDirectoryForClasses(classes, path, classLoader);
+            return;
         }
 
         if (path.toString().endsWith(".jar")) {
-            return scanJarForClasses(path, classLoader);
+            scanJarForClasses(classes, path, classLoader);
         }
-
-
-        return List.of();
     }
-
 
     // Method to scan a directory for .class files
-    public static List<Class<?>> scanDirectoryForClasses(Path directory, ClassLoader loader) {
-        List<Class<?>> classes = new ArrayList<>();
-        try {
-            Files.walk(directory)
+    static void scanDirectoryForClasses(final List<Class<?>> classes, final Path directory, final ClassLoader loader) {
+        try (var walk = Files.walk(directory)) {
+            var paths = walk
                     .filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".class"))
-                    .filter(path -> !path.toString().contains("module-info.class"))
-                    .filter(path -> !path.toString().contains("META-INF"))
-                    .forEach(path -> {
-                        try {
-                            String className = getClassNameFromPath(directory, path);
-                            Class<?> clazz = Class.forName(className, false, loader);
-                            classes.add(clazz);
-                        } catch (ClassNotFoundException e) {
-                            // Handle the exception (class may not be found in the classpath)
-                            e.printStackTrace();
-                        }
-                    });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return classes;
-    }
-
-    // Helper method to convert file path to class name
-    private static String getClassNameFromPath(Path baseDirectory, Path classFile) {
-        String className = baseDirectory.relativize(classFile).toString();
-        className = className.replace(File.separator, ".").replace(".class", "");
-        return className;
+                    .toArray(Path[]::new);
+            for (Path path : paths) {
+                handleClass(classes, path, loader);
+            }
+        } catch (IOException ignored) {}
     }
 
     // Method to scan a JAR file for .class files
-    public static List<Class<?>> scanJarForClasses(Path jar, ClassLoader classLoader) {
-        List<Class<?>> classes = new ArrayList<>();
+    static void scanJarForClasses(final List<Class<?>> classes, final Path jar, final ClassLoader classLoader) {
         try (ZipFile zipFile = new ZipFile(jar.toFile())) {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
-                String name = entry.getName();
-                if (name.endsWith(".class") && !name.endsWith("module-info.class") && !name.contains("META-INF")) {
-                    String className = name.replace("/", ".").substring(0, name.length() - 6); // remove .class
-                    try {
-                        Class<?> clazz = Class.forName(className, false, classLoader);
-                        classes.add(clazz);
-                    } catch (ClassNotFoundException e) {
-                        // Handle the exception (class may not be found in the classpath)
-                        e.printStackTrace();
-                    }
-                }
+                handleClass(classes, entry.getName(), classLoader);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return classes;
+        } catch (IOException ignored) {}
     }
+
+    // Do any extra checks here, as its directory, and not in a jar...
+    static void handleClass(final List<Class<?>> classes, final Path path, final ClassLoader loader) {
+        handleClass(classes, path.toString(), loader);
+    }
+
+    static void handleClass(final List<Class<?>> classes, String path, final ClassLoader loader) {
+        if (!path.contains(".class") || path.contains("META-INF/")) return;
+        if (path.contains("module-info.class") || path.contains("package-info.class")) return;
+
+        // This is most likely dev env
+        if (path.contains("java\\main"))
+            path = path.substring(path.indexOf("java\\main") + 10);
+
+        // Now get it in a reference-able state, for Class.forName()
+        path = path.replace("\\", ".").replace("/", ".").replace(".class", "");
+
+        try {
+            classes.add(
+                    Class.forName(
+                            path,
+                            false,
+                            loader
+                    )
+            );
+        } catch (Throwable ignored) {}
+    }
+
 }
