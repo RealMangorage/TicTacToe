@@ -1,29 +1,20 @@
 package org.mangorage.game.network;
+import org.mangorage.game.network.core.Direction;
+import org.mangorage.game.network.packets.serverbound.C2SJoinPacket;
+
 import java.io.*;
 import java.net.*;
 
 public class Client {
     public static void main(String[] args) {
+        initClient();
+    }
 
+    public static void initClient() {
+        try (Socket socket = new Socket("localhost", 25564)) {
+            Connection connection = new Connection(socket, Direction.C2S);
 
-
-
-
-        String host = "localhost"; // Change this if you’re networking across the void
-        int port = 12345;
-
-        try (Socket socket = new Socket(host, port)) {
-            System.out.println("Connected to the server. Whoop-de-doo.");
-
-            // Send a "packet" (aka a line of text, don't get fancy now)
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            out.println("Hey server, here's your precious packet. Hope you're happy.");
-
-            // Optionally read the response, because maybe the server had something to say for once
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String response = in.readLine();
-            System.out.println("Server responded with: " + response);
-
+            connection.send(C2SJoinPacket.INSTANCE);
         } catch (IOException e) {
             System.err.println("The client tripped over its own feet: " + e.getMessage());
         }

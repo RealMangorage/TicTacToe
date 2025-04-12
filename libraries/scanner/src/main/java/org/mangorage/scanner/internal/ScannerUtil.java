@@ -103,22 +103,22 @@ public final class ScannerUtil {
                     )
             );
         } catch (Throwable ignored) {
-            cache.data().add(
-                    new UnbakedResource(loader, formatPath(path, false))
-            );
+            if (path.contains(".class")) {
+                cache.failed_classes()
+                        .add(
+                                new UnbakedResource(loader, formatPath(path, false))
+                        );
+            } else {
+                cache.data()
+                        .add(
+                                new UnbakedResource(loader, formatPath(path, false))
+                        );
+            }
         }
     }
 
     static String formatPath(final String path, final boolean isClass) {
-        if (path.contains("java") || isClass) {
-            return path.replaceAll("^.*?java[/\\\\][^/\\\\]+[/\\\\]|\\.class$", "").replaceAll("[/\\\\]", ".");
-        }
-
-        if (path.contains("resources")) {
-            return path.replace("\\", "/").replaceFirst("^.*?resources/[^/]+/", "");
-        }
-
-        return path;
+        return isClass ? path.replaceAll("^.*?java[/\\\\][^/\\\\]+[/\\\\]|\\.class$", "").replaceAll("[/\\\\]", ".") : path.replace("\\", "/").replaceFirst("^.*?resources/[^/]+/", "");
     }
 
 }

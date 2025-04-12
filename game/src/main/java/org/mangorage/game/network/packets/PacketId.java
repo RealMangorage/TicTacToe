@@ -1,3 +1,9 @@
 package org.mangorage.game.network.packets;
 
-public record PacketId<T extends Packet>() {}
+import java.util.UUID;
+
+public record PacketId<T extends Packet>(UUID uuid) {
+    public PacketId() {
+        this(UUID.randomUUID());
+    }
+}

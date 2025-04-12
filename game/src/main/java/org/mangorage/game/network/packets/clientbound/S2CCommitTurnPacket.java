@@ -1,6 +1,7 @@
 package org.mangorage.game.network.packets.clientbound;
 
 import org.mangorage.buffer.api.SimpleByteBuf;
+import org.mangorage.game.network.Connection;
 import org.mangorage.game.network.packets.Packet;
 import org.mangorage.game.network.packets.PacketId;
 
@@ -20,7 +21,7 @@ public class S2CCommitTurnPacket implements Packet {
     }
 
     @Override
-    public void handle() {
+    public void handle(Connection connection) {
 
     }
 

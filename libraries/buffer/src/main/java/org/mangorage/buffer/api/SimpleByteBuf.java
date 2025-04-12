@@ -6,17 +6,33 @@ import java.nio.charset.StandardCharsets;
 
 public final class SimpleByteBuf {
 
-    private byte[] buffer;
-    private int readIndex;
-    private int writeIndex;
-
-    public SimpleByteBuf(int initialCapacity) {
-        buffer = new byte[initialCapacity];
-        readIndex = 0;
-        writeIndex = 0;
+    public static SimpleByteBuf of(int size) {
+        return new SimpleByteBuf(size);
     }
 
-    public SimpleByteBuf() {
+    public static SimpleByteBuf of() {
+        return new SimpleByteBuf();
+    }
+
+    public static SimpleByteBuf wrap(byte[] array) {
+        return new SimpleByteBuf(array);
+    }
+
+    private byte[] buffer;
+    private int readIndex = 0;
+    private int writeIndex = 0;
+
+
+    SimpleByteBuf(byte[] array) {
+        this.buffer = array;
+        this.writeIndex = array.length;
+    }
+
+    SimpleByteBuf(int initialCapacity) {
+        buffer = new byte[initialCapacity];
+    }
+
+    SimpleByteBuf() {
         this(256); // Default initial capacity
     }
 
