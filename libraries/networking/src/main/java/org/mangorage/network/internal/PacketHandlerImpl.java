@@ -1,45 +1,40 @@
-package org.mangorage.game.network.core;
+package org.mangorage.network.internal;
 
 import org.mangorage.buffer.api.SimpleByteBuf;
-import org.mangorage.game.network.Connection;
-import org.mangorage.game.network.packets.Packet;
-import org.mangorage.game.network.packets.PacketId;
-import org.mangorage.game.network.packets.clientbound.S2CCommitTurnPacket;
-import org.mangorage.game.network.packets.clientbound.S2CGridUpdatePacket;
-import org.mangorage.game.network.packets.serverbound.C2SJoinPacket;
-import org.mangorage.game.network.packets.serverbound.C2SLeavePacket;
-import org.mangorage.game.network.packets.serverbound.C2SSelectGridPacket;
+import org.mangorage.network.api.Connection;
+import org.mangorage.network.api.Direction;
+import org.mangorage.network.api.Packet;
+import org.mangorage.network.api.PacketHandler;
+import org.mangorage.network.api.PacketHandlerBuilder;
+import org.mangorage.network.api.PacketId;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-public final class PacketHandler {
-    public static final PacketHandler INSTANCE = new PacketHandler()
-            .register(0, S2CGridUpdatePacket.ID, Direction.S2C, S2CGridUpdatePacket::decode)
-            .register(1, S2CCommitTurnPacket.ID, Direction.S2C, S2CCommitTurnPacket::decode)
-
-            .register(2, C2SJoinPacket.ID, Direction.C2S, C2SJoinPacket::decode)
-            .register(3, C2SLeavePacket.ID, Direction.C2S, C2SLeavePacket::decode)
-            .register(4, C2SSelectGridPacket.ID, Direction.C2S, C2SSelectGridPacket::decode);
-
-    public static void init() {}
-
+public final class PacketHandlerImpl implements PacketHandlerBuilder, PacketHandler {
     private final Map<Integer, PacketId<?>> packetIdById = new HashMap<>();
     private final Map<PacketId<?>, RegisteredPacket> idByPacketId = new HashMap<>();
 
     private record RegisteredPacket(int id, Direction direction, Function<SimpleByteBuf, ? extends Packet> decoder) {}
     
-    PacketHandler() {}
-    
-    <T extends Packet> PacketHandler register(final int id, PacketId<T> packetId, Direction direction, Function<SimpleByteBuf, T> decoder) {
+    public PacketHandlerImpl() {}
+
+    @Override
+    public <T extends Packet> PacketHandlerBuilder register(final int id, final PacketId<T> packetId, final Direction direction, final Function<SimpleByteBuf, T> decoder) {
         idByPacketId.put(packetId, new RegisteredPacket(id, direction, decoder));
         packetIdById.put(id, packetId);
         return this;
     }
 
-    public SimpleByteBuf encodePacket(Packet packet) {
+    @Override
+    public PacketHandler build() {
+        return this;
+    }
+
+    @Override
+    public SimpleByteBuf encodePacket(final Packet packet) {
         var id = idByPacketId.get(packet.getId());
         if (id == null) throw new IllegalStateException("Packet %s is not registered...".formatted(packet.getClass()));
 
@@ -49,8 +44,9 @@ public final class PacketHandler {
 
         return buf;
     }
-    
-    public Optional<Packet> decodePacket(SimpleByteBuf smartByteBuf) {
+
+    @Override
+    public Optional<Packet> decodePacket(final SimpleByteBuf smartByteBuf) {
         try {
             var intId = smartByteBuf.readInt();
             var packetId = packetIdById.get(intId);
@@ -66,7 +62,8 @@ public final class PacketHandler {
         }
     }
 
-    public void handlePacket(Packet packet, Connection connection) {
+    @Override
+    public void handlePacket(final Packet packet, final Connection connection) {
         var id = idByPacketId.get(packet.getId());
         if (id == null) throw new IllegalStateException("Packet %s is not registered...".formatted(packet.getClass()));
         if (id.direction() != connection.getIncomingDirection()) throw new IllegalStateException("Attempted to handle packet on incorrect side, expected %s, got %s".formatted(connection.getIncomingDirection(), id.direction()));

@@ -1,13 +1,19 @@
+// Name
 rootProject.name = 'tictactoe'
 
+// Main
 include 'game'
 
-
+// Libraries
 include 'libraries'
 include 'libraries:scanner'
-include 'libraries:buffer'
+include 'libraries:networking'
 
+// Mods
 include 'mods'
 include 'mods:chatgptplayer'
 include 'mods:examplemod'
+
+// Other
+findProject(':libraries:networking')?.name = 'networking'
 

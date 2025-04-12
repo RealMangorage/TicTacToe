@@ -1,18 +1,19 @@
 package org.mangorage.game.network;
-import org.mangorage.game.network.core.Direction;
 import org.mangorage.game.network.packets.serverbound.C2SJoinPacket;
+import org.mangorage.network.api.Connection;
+import org.mangorage.network.api.Direction;
 
 import java.io.*;
 import java.net.*;
 
 public class Client {
-    public static void main(String[] args) {
-        initClient();
+    public static void main(final String[] args) {
+        initClient("localhost", 25564);
     }
 
-    public static void initClient() {
-        try (Socket socket = new Socket("localhost", 25564)) {
-            Connection connection = new Connection(socket, Direction.C2S);
+    public static void initClient(final String host, final int port) {
+        try (Socket socket = new Socket(host, port)) {
+            Connection connection = Connection.of(socket, Network.INSTANCE, Direction.C2S);
 
             connection.send(C2SJoinPacket.INSTANCE);
         } catch (IOException e) {

@@ -1,12 +1,14 @@
 package org.mangorage.game.network;
 
-import org.mangorage.game.network.core.Direction;
 import org.mangorage.game.players.RemotePlayer;
+import org.mangorage.network.api.Connection;
+import org.mangorage.network.api.Direction;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server {
+public final class Server {
     private static final RemotePlayer.Properties PROPERTIES = new RemotePlayer.Properties();
     public static final RemotePlayer REMOTE_PLAYER = new RemotePlayer(PROPERTIES);
 
@@ -20,7 +22,7 @@ public class Server {
                 System.out.println("COOL");
 
                 if (Network.getPlayerConnection() == null) {
-                    Network.setPlayerConnection(new Connection(clientSocket, Direction.C2S));
+                    Network.setPlayerConnection(Connection.of(clientSocket, Network.INSTANCE, Direction.C2S));
                 }
             }
         } catch (IOException e) {
@@ -28,7 +30,7 @@ public class Server {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         initServer();
     }
 }

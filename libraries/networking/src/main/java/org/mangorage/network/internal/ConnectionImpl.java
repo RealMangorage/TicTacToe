@@ -1,18 +1,22 @@
-package org.mangorage.game.network;
+package org.mangorage.network.internal;
 
 import org.mangorage.buffer.api.SimpleByteBuf;
-import org.mangorage.game.network.core.Direction;
-import org.mangorage.game.network.core.PacketHandler;
-import org.mangorage.game.network.packets.Packet;
+import org.mangorage.network.api.Connection;
+import org.mangorage.network.api.Direction;
+import org.mangorage.network.api.Packet;
+import org.mangorage.network.api.PacketHandler;
+
 import java.io.IOException;
 import java.net.Socket;
 
-public final class Connection {
+public final class ConnectionImpl implements Connection {
     private final Socket socket;
+    private final PacketHandler packetHandler;
     private final Direction incomingDirection;
 
-    Connection(Socket socket, Direction incomingDirection) {
+    public ConnectionImpl(final Socket socket, final PacketHandler packetHandler, final Direction incomingDirection) {
         this.socket = socket;
+        this.packetHandler = packetHandler;
         this.incomingDirection = incomingDirection;
 
         handleIncoming();
@@ -21,13 +25,13 @@ public final class Connection {
     public void handleIncoming() {
         new Thread(() -> {
             try {
-                var input = socket.getInputStream();
+                final var input = socket.getInputStream();
 
                 while (!socket.isClosed()) {
-                    var data = input.readAllBytes();
+                    final var data = input.readAllBytes();
                     if (data.length == 0) continue;
-                    PacketHandler.INSTANCE.decodePacket(SimpleByteBuf.wrap(data)).ifPresent(packet -> {
-                        PacketHandler.INSTANCE.handlePacket(packet, this);
+                    packetHandler.decodePacket(SimpleByteBuf.wrap(data)).ifPresent(packet -> {
+                        packetHandler.handlePacket(packet, this);
                     });
                 }
             } catch (IOException e) {
@@ -46,10 +50,10 @@ public final class Connection {
         return incomingDirection;
     }
 
-    public void send(Packet packet) {
+    public void send(final Packet packet) {
         try {
-            var os = socket.getOutputStream();
-            var buf = PacketHandler.INSTANCE.encodePacket(packet);
+            final var os = socket.getOutputStream();
+            final var buf = packetHandler.encodePacket(packet);
             os.write(buf.array());
             os.flush();
         } catch (IOException e) {

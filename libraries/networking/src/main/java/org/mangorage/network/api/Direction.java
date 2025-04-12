@@ -1,4 +1,4 @@
-package org.mangorage.game.network.core;
+package org.mangorage.network.api;
 
 public enum Direction {
     C2S, // Client -> Server

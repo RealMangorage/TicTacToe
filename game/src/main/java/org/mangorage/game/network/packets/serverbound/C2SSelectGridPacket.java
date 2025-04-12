@@ -1,12 +1,12 @@
 package org.mangorage.game.network.packets.serverbound;
 
 import org.mangorage.buffer.api.SimpleByteBuf;
-import org.mangorage.game.network.Connection;
-import org.mangorage.game.network.packets.Packet;
-import org.mangorage.game.network.packets.PacketId;
+import org.mangorage.network.api.Connection;
+import org.mangorage.network.api.Packet;
+import org.mangorage.network.api.PacketId;
 
 public final class C2SSelectGridPacket implements Packet {
-    public static final PacketId<C2SSelectGridPacket> ID = new PacketId<>();
+    public static final PacketId<C2SSelectGridPacket> ID = PacketId.create();
 
     public static C2SSelectGridPacket decode(SimpleByteBuf buf) {
         return new C2SSelectGridPacket(buf.readInt());
@@ -23,9 +23,7 @@ public final class C2SSelectGridPacket implements Packet {
         buffer.writeInt(position);
     }
 
-    @Override
     public void handle(Connection connection) {
-
     }
 
     @Override

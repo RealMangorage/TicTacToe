@@ -1,12 +1,12 @@
 package org.mangorage.game.network.packets.clientbound;
 
 import org.mangorage.buffer.api.SimpleByteBuf;
-import org.mangorage.game.network.Connection;
-import org.mangorage.game.network.packets.Packet;
-import org.mangorage.game.network.packets.PacketId;
+import org.mangorage.network.api.Connection;
+import org.mangorage.network.api.Packet;
+import org.mangorage.network.api.PacketId;
 
 public class S2CCommitTurnPacket implements Packet {
-    public static final PacketId<S2CCommitTurnPacket> ID = new PacketId<>();
+    public static final PacketId<S2CCommitTurnPacket> ID = PacketId.create();
     public static final S2CCommitTurnPacket INSTANCE = new S2CCommitTurnPacket();
 
     public static S2CCommitTurnPacket decode(SimpleByteBuf buf) {

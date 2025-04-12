@@ -1,7 +1,7 @@
 package org.mangorage.game;
 
 import org.mangorage.game.core.PlayerType;
-import org.mangorage.game.network.core.PacketHandler;
+import org.mangorage.game.network.Network;
 import org.mangorage.scanner.api.Scanner;
 import org.mangorage.scanner.api.ScannerBuilder;
 
@@ -46,9 +46,9 @@ public final class Main {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         PlayerType.init();
-        PacketHandler.init();
+        Network.init();
 
         SwingUtilities.invokeLater(() -> {
             Game.init();

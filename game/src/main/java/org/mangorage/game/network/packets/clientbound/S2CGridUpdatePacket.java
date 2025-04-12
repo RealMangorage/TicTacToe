@@ -2,13 +2,13 @@ package org.mangorage.game.network.packets.clientbound;
 
 
 import org.mangorage.buffer.api.SimpleByteBuf;
-import org.mangorage.game.network.Connection;
-import org.mangorage.game.network.packets.Packet;
-import org.mangorage.game.network.packets.PacketId;
+import org.mangorage.network.api.Connection;
+import org.mangorage.network.api.Packet;
+import org.mangorage.network.api.PacketId;
 
 
 public final class S2CGridUpdatePacket implements Packet {
-    public static final PacketId<S2CGridUpdatePacket> ID = new PacketId<>();
+    public static final PacketId<S2CGridUpdatePacket> ID = PacketId.create();
 
 
     public static S2CGridUpdatePacket decode(SimpleByteBuf buf) {
@@ -36,6 +36,7 @@ public final class S2CGridUpdatePacket implements Packet {
     public void handle(Connection connection) {
 
     }
+
 
     @Override
     public PacketId<S2CGridUpdatePacket> getId() {
