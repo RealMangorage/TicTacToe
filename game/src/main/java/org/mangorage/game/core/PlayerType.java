@@ -1,16 +1,9 @@
 package org.mangorage.game.core;
 
+import org.mangorage.game.Main;
 import org.mangorage.game.api.Mod;
 import org.mangorage.game.players.Player;
-import org.mangorage.scanner.api.Scanner;
-import org.mangorage.scanner.api.ScannerBuilder;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -39,17 +32,8 @@ public final class PlayerType {
     public static void init() {
         if (loaded) return;
 
-        URLClassLoader playerClassloader = new URLClassLoader(getFilesInFolder(Path.of("players")));
-
-        Scanner scanner = ScannerBuilder.of()
-                .addClasspath(PlayerType.class.getClassLoader())
-                .addClassloader(playerClassloader)
-                .build();
-
-        scanner.commitScan();
-
         frozen = false;
-        scanner.findClassesWithPredicate(clz -> clz.isAnnotationPresent(Mod.class)).forEach(clz -> {
+        Main.getScanner().findClassesWithPredicate(clz -> clz.isAnnotationPresent(Mod.class)).forEach(clz -> {
             try {
                 clz.getConstructor().newInstance();
             } catch (Throwable e) {
@@ -60,20 +44,6 @@ public final class PlayerType {
         // Finish up loading PlayerTypes, no more need for registering...
         frozen = true;
         loaded = true;
-    }
-
-    @SuppressWarnings("all")
-    public static URL[] getFilesInFolder(Path folderPath) {
-        if (!Files.isDirectory(folderPath)) return new URL[]{};
-        return Arrays.stream(folderPath.toFile().listFiles())
-                .map(file -> {
-                    try {
-                        return file.toURI().toURL();
-                    } catch (MalformedURLException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .toArray(URL[]::new);
     }
 
     private final String id;

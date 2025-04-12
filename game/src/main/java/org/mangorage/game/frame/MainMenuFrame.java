@@ -12,6 +12,7 @@ package org.mangorage.game.frame;
  * Exit Game
  */
 import org.mangorage.game.Game;
+import org.mangorage.game.Main;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,7 +66,13 @@ public class MainMenuFrame extends JFrame {
     }
 
     private ImageIcon createIcon(String path) {
-        return new ImageIcon(MainMenuFrame.class.getClassLoader().getResource(path));
+        return new ImageIcon(
+                Main.getScanner()
+                        .findResource(resource -> resource.contains(path))
+                        .findFirst()
+                        .orElseThrow()
+                        .get()
+        );
     }
 
     private ImageIcon resizeIcon(ImageIcon icon, int width, int height) {

@@ -1,5 +1,6 @@
 package org.mangorage.scanner.internal;
 
+import org.mangorage.scanner.api.Resource;
 import org.mangorage.scanner.api.Scanner;
 import org.mangorage.scanner.api.ScannerBuilder;
 
@@ -14,10 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public final class ScannerImpl implements Scanner {
     private final Map<ClassLoader, List<Path>> paths_per_loader;
-    private List<Class<?>> classesCache = List.of();
+    private final ScanCache cache = new ScanCache(new ArrayList<>(), new ArrayList<>());
 
 
     ScannerImpl(final Map<ClassLoader, List<Path>> paths_per_loader) {
@@ -32,30 +34,35 @@ public final class ScannerImpl implements Scanner {
 
     @Override
     public void commitScan() {
-        final List<Class<?>> cache = new ArrayList<>();
-
         paths_per_loader.forEach((k, v) -> {
             for (final Path path : v) {
                 ScannerUtil.scanPath(cache, path, k);
             }
         });
-
-        // Needs to be read only...
-        classesCache = List.copyOf(cache);
     }
 
     @Override
     public List<Class<?>> findClassesWithAnnotation(final Class<? extends Annotation> annotation) {
-        return classesCache.stream()
+        return cache.classes()
+                .stream()
                 .filter(clz -> clz.isAnnotationPresent(annotation))
                 .toList();
     }
 
     @Override
     public List<Class<?>> findClassesWithPredicate(final Predicate<Class<?>> predicate) {
-        return classesCache.stream()
+        return cache.classes()
+                .stream()
                 .filter(predicate)
                 .toList();
+    }
+
+    @Override
+    public Stream<Resource> findResource(final Predicate<String> predicate) {
+        return cache.data()
+                .stream()
+                .filter(resource -> predicate.test(resource.path()))
+                .map(UnbakedResource::bake);
     }
 
     public static final class Builder implements ScannerBuilder {
