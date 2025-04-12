@@ -1,0 +1,52 @@
+plugins {
+    id 'com.gradleup.shadow' version '9.+' apply false
+    id 'org.javamodularity.moduleplugin' version '1.8.15' apply false
+}
+
+subprojects {
+    if (project.name in ['libraries', 'mods']) return
+
+    apply plugin: 'java'
+    apply plugin: 'com.gradleup.shadow'
+    apply plugin: 'org.javamodularity.moduleplugin'
+
+    group = 'org.mangorage'
+    version = '1.0-Alpha.0'
+
+    if (project.name in ['game']) {
+        dependencies {
+            implementation project(":libraries:scanner")
+            implementation project(":libraries:networking")
+        }
+    }
+
+    if (project.name in ['examplemod']) {
+        dependencies {
+            implementation project(":game")
+        }
+    }
+
+    if (project.name in ['chatgptplayer']) {
+        configurations {
+            // Define a new configuration for runtime that excludes ":game" dependency
+            include
+        }
+
+        repositories {
+            mavenCentral()
+        }
+
+        dependencies {
+            implementation 'io.github.stefanbratanov:jvm-openai:0.11.0'
+            include 'io.github.stefanbratanov:jvm-openai:0.11.0'
+
+
+            compileOnly project(":game")
+        }
+
+
+        shadowJar {
+            configurations = [project.configurations.include]
+        }
+    }
+}
