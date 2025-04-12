@@ -12,7 +12,7 @@ public class Client {
         }).start();
     }
 
-    private static void initClient(final String host, final int port, String username, char[] password) {
+    private static void initClient(final String host, final int port, final String username, final char[] password) {
         try (final Socket socket = new Socket(host, port)) {
             socket.setSoTimeout(1000000);
             Connection connection = Connection.ofThreaded(socket, Network.INSTANCE, Direction.SERVER);

@@ -1,6 +1,5 @@
 package org.mangorage.game.network;
 
-import org.mangorage.game.network.packets.clientbound.S2CCommitTurnPacket;
 import org.mangorage.game.network.packets.clientbound.S2CGridUpdatePacket;
 import org.mangorage.game.network.packets.serverbound.C2SJoinPacket;
 import org.mangorage.game.network.packets.serverbound.C2SLeavePacket;
@@ -15,7 +14,6 @@ public final class Network {
     private static int ID = 0;
     public static final PacketHandler INSTANCE = PacketHandlerBuilder.create()
             .register(ID++, S2CGridUpdatePacket.ID, Direction.SERVER, S2CGridUpdatePacket::decode)
-            .register(ID++, S2CCommitTurnPacket.ID, Direction.SERVER, S2CCommitTurnPacket::decode)
 
             .register(ID++, C2SJoinPacket.ID, Direction.CLIENT, C2SJoinPacket::decode)
             .register(ID++, C2SLeavePacket.ID, Direction.CLIENT, C2SLeavePacket::decode)

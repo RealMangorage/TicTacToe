@@ -1,8 +1,6 @@
 package org.mangorage.game.players;
 
 import org.mangorage.game.api.Board;
-import org.mangorage.game.network.Network;
-import org.mangorage.game.network.packets.clientbound.S2CCommitTurnPacket;
 
 public final class RemotePlayer implements Player {
 
@@ -11,12 +9,10 @@ public final class RemotePlayer implements Player {
         this.username = username;
     }
 
+    // No reason to do this, other then for telling the client to play a sound
+    // In Which case we could make a S2CPlaySoundPacket
     @Override
     public void commitTurn(Board board) {
-        var plr = Network.getPlayerConnection();
-        if (plr != null) {
-            plr.send(S2CCommitTurnPacket.INSTANCE);
-        }
     }
 
     @Override
