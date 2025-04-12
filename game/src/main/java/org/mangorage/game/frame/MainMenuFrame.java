@@ -13,6 +13,8 @@ package org.mangorage.game.frame;
  */
 import org.mangorage.game.Game;
 import org.mangorage.game.Main;
+import org.mangorage.game.network.Network;
+import org.mangorage.game.network.Server;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,8 +53,8 @@ public class MainMenuFrame extends JFrame {
         // ===== Center Button Panel =====
         JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 10, 10));
         buttonPanel.add(createButton("Single Player", e -> handleSinglePlayer()));
-        buttonPanel.add(createButton("Host (W.I.P)", e -> handleHost()));
-        buttonPanel.add(createButton("Join (W.I.P)", e -> handleJoin()));
+        buttonPanel.add(createButton("Host", e -> handleHost()));
+        buttonPanel.add(createButton("Join", e -> handleJoin()));
         buttonPanel.add(createButton("Exit Game", e -> System.exit(0)));
 
         add(buttonPanel, BorderLayout.CENTER);
@@ -137,18 +139,18 @@ public class MainMenuFrame extends JFrame {
     // Placeholder methods to replace your future masterpieces
     private void handleSinglePlayer() {
         System.out.println("Single Player selected");
-        SwingUtilities.invokeLater(() -> {
-            setVisible(false);
-            Game.getMenuFrame().setVisible(true);
-        });
+        setVisible(false);
+        Game.getMenuFrame().setVisible(true);
     }
 
     private void handleHost() {
         System.out.println("Host selected");
+        Game.getHostServerFrame().showMenu();
     }
 
     private void handleJoin() {
         System.out.println("Join selected");
+        Game.getJoinServerFrame().showMenu();
     }
 
     private void openLink(String url) {

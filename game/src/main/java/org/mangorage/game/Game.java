@@ -3,9 +3,8 @@ package org.mangorage.game;
 import org.mangorage.game.core.BoardImpl;
 import org.mangorage.game.core.PlayerSet;
 import org.mangorage.game.frame.MainMenuFrame;
-import org.mangorage.game.frame.multiplayer.HostServerFrame;
+import org.mangorage.game.frame.multiplayer.ServerFrame;
 import org.mangorage.game.frame.multiplayer.RemoteFrame;
-import org.mangorage.game.frame.multiplayer.ServerJoinFrame;
 import org.mangorage.game.frame.singleplayer.BoardFrame;
 import org.mangorage.game.frame.singleplayer.MenuFrame;
 import org.mangorage.game.players.HumanPlayer;
@@ -22,8 +21,8 @@ public class Game {
     private static final RemoteFrame remoteFrame = new RemoteFrame();
 
     // Sub Menus
-    private static final HostServerFrame hostServerFrame = new HostServerFrame();
-    private static final ServerJoinFrame serverJoinFrame = new ServerJoinFrame();
+    private static final ServerFrame hostServerFrame = new ServerFrame(false);
+    private static final ServerFrame joinServerFrame = new ServerFrame(true);
 
     // Used for Singleplayer/Host
     private static final BoardImpl board = new BoardImpl();
@@ -50,16 +49,16 @@ public class Game {
     }
 
     // Multiplayer Menus
-    public static HostServerFrame getHostServerFrame() {
+    public static ServerFrame getHostServerFrame() {
         return hostServerFrame;
     }
 
-    public ServerJoinFrame getServerJoinFrame() {
-        return serverJoinFrame;
+    public static ServerFrame getJoinServerFrame() {
+        return joinServerFrame;
     }
 
     // Used for when in a server
-    public RemoteFrame getRemoteFrame() {
+    public static RemoteFrame getRemoteFrame() {
         return remoteFrame;
     }
 

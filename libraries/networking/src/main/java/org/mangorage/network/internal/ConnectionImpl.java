@@ -6,6 +6,7 @@ import org.mangorage.network.api.Direction;
 import org.mangorage.network.api.Packet;
 import org.mangorage.network.api.PacketHandler;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -14,36 +15,51 @@ public final class ConnectionImpl implements Connection {
     private final PacketHandler packetHandler;
     private final Direction incomingDirection;
 
-    public ConnectionImpl(final Socket socket, final PacketHandler packetHandler, final Direction incomingDirection) {
+    public ConnectionImpl(final Socket socket, final PacketHandler packetHandler, final Direction incomingDirection, boolean threaded) {
         this.socket = socket;
         this.packetHandler = packetHandler;
         this.incomingDirection = incomingDirection;
 
-        handleIncoming();
+        handleIncoming(threaded);
     }
 
-    public void handleIncoming() {
-        new Thread(() -> {
+    public void handleIncoming(final boolean threaded) {
+        Runnable runnable = () -> {
             try {
                 final var input = socket.getInputStream();
+                final var outputBuffer = new ByteArrayOutputStream();
+                final var buffer = new byte[1024];
 
-                while (!socket.isClosed()) {
-                    final var data = input.readAllBytes();
-                    if (data.length == 0) continue;
-                    packetHandler.decodePacket(SimpleByteBuf.wrap(data)).ifPresent(packet -> {
-                        packetHandler.handlePacket(packet, this);
-                    });
+                while (socket.isConnected()) {
+                    int read = input.read(buffer);
+                    if (read == -1) break; // Server closed stream
+
+                    outputBuffer.write(buffer, 0, read);
+
+                    byte[] data = outputBuffer.toByteArray();
+                    outputBuffer.reset();
+
+                    if (data.length > 0) {
+                        packetHandler.decodePacket(SimpleByteBuf.wrap(data))
+                                .ifPresent(packet -> packetHandler.handlePacket(packet, this));
+                    }
                 }
             } catch (IOException e) {
-                System.err.println("Client gave up: " + e.getMessage());
+                System.err.println("Connection gave up: " + e.getMessage());
             } finally {
                 try {
                     socket.close();
                 } catch (IOException ignored) {
-                    // LOL, of course this fails silently
+                    // socket dies quietly, like your last brain cell
                 }
             }
-        }, "Connection-Handler-" + incomingDirection).start();
+        };
+
+        if (threaded) {
+            new Thread(runnable).start();
+        } else {
+            runnable.run();
+        }
     }
 
     public Direction getIncomingDirection() {

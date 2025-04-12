@@ -1,49 +1,26 @@
 package org.mangorage.game.players;
 
 import org.mangorage.game.api.Board;
-
-import java.util.function.Consumer;
+import org.mangorage.game.network.Network;
+import org.mangorage.game.network.packets.clientbound.S2CCommitTurnPacket;
 
 public final class RemotePlayer implements Player {
 
-
-    public final static class Properties {
-        private String name;
-        private Consumer<Board> commitTurn;
-
-        public Properties() {}
-
-        public String getName() {
-            return name;
-        }
-
-        public Consumer<Board> getCommitTurn() {
-            return commitTurn;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public void setCommitTurn(Consumer<Board> boardConsumer) {
-            this.commitTurn = boardConsumer;
-        }
-    }
-
-
-    private final Properties properties;
-
-    public RemotePlayer(Properties properties) {
-        this.properties = properties;
+    private final String username;
+    public RemotePlayer(final String username) {
+        this.username = username;
     }
 
     @Override
     public void commitTurn(Board board) {
-        this.properties.getCommitTurn().accept(board);
+        var plr = Network.getPlayerConnection();
+        if (plr != null) {
+            plr.send(S2CCommitTurnPacket.INSTANCE);
+        }
     }
 
     @Override
     public String getName() {
-        return this.properties.getName();
+        return username;
     }
 }

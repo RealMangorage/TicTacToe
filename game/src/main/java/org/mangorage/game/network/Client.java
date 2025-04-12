@@ -2,22 +2,27 @@ package org.mangorage.game.network;
 import org.mangorage.game.network.packets.serverbound.C2SJoinPacket;
 import org.mangorage.network.api.Connection;
 import org.mangorage.network.api.Direction;
-
-import java.io.*;
 import java.net.*;
+import java.util.Scanner;
 
 public class Client {
-    public static void main(final String[] args) {
-        initClient("localhost", 25564);
+    public static void initNewClient(final String host, final int port, final String username, final char[] password) {
+        new Thread(() -> {
+            initClient(host, port, username, password);
+        }).start();
     }
 
-    public static void initClient(final String host, final int port) {
-        try (Socket socket = new Socket(host, port)) {
-            Connection connection = Connection.of(socket, Network.INSTANCE, Direction.C2S);
+    private static void initClient(final String host, final int port, String username, char[] password) {
+        try (final Socket socket = new Socket(host, port)) {
+            socket.setSoTimeout(1000000);
+            Connection connection = Connection.ofThreaded(socket, Network.INSTANCE, Direction.SERVER);
 
-            connection.send(C2SJoinPacket.INSTANCE);
-        } catch (IOException e) {
-            System.err.println("The client tripped over its own feet: " + e.getMessage());
+            Thread.sleep(1000);
+            connection.send(new C2SJoinPacket(username, password));
+            Network.setPlayerConnection(connection);
+            new Scanner(System.in).nextLine(); // keep the thread alive, because why not
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
     }
 }

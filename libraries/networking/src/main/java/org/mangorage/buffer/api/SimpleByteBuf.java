@@ -167,6 +167,39 @@ public final class SimpleByteBuf {
         return new String(bytes, StandardCharsets.UTF_8); // Convert to string
     }
 
+    public SimpleByteBuf writeCharArray(char[] array) {
+        ensureWritable(4 + array.length * 2); // 4 bytes for length + 2 per char
+        writeInt(array.length); // Write the array length
+        for (char c : array) {
+            writeChar(c);
+        }
+        return this;
+    }
+
+    public char[] readCharArray() {
+        int length = readInt(); // Read length
+        char[] result = new char[length];
+        for (int i = 0; i < length; i++) {
+            result[i] = readChar();
+        }
+        return result;
+    }
+
+    public char readChar() {
+        if (readableBytes() < 2) {
+            throw new IndexOutOfBoundsException("Not enough bytes to read a char.");
+        }
+        return (char) (((buffer[readIndex++] & 0xFF) << 8) |
+                (buffer[readIndex++] & 0xFF));
+    }
+
+    public SimpleByteBuf writeChar(char value) {
+        ensureWritable(2);
+        buffer[writeIndex++] = (byte) (value >>> 8);
+        buffer[writeIndex++] = (byte) value;
+        return this;
+    }
+
     // Reset the read index
     public void resetReaderIndex() {
         readIndex = 0;

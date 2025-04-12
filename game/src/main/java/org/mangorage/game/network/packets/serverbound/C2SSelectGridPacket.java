@@ -1,6 +1,8 @@
 package org.mangorage.game.network.packets.serverbound;
 
 import org.mangorage.buffer.api.SimpleByteBuf;
+import org.mangorage.game.Game;
+import org.mangorage.game.network.Network;
 import org.mangorage.network.api.Connection;
 import org.mangorage.network.api.Packet;
 import org.mangorage.network.api.PacketId;
@@ -24,6 +26,7 @@ public final class C2SSelectGridPacket implements Packet {
     }
 
     public void handle(Connection connection) {
+        Game.getBoard().setPosition(Network.getPlayer(), position);
     }
 
     @Override

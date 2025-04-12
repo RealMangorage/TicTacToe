@@ -3,6 +3,9 @@ package org.mangorage.game.frame.singleplayer;
 import org.mangorage.game.Game;
 import org.mangorage.game.core.BoardImpl;
 import org.mangorage.game.core.Scoreboard;
+import org.mangorage.game.network.Network;
+import org.mangorage.game.network.Server;
+import org.mangorage.game.network.packets.clientbound.S2CGridUpdatePacket;
 import org.mangorage.game.players.HumanPlayer;
 
 import javax.swing.*;
@@ -120,6 +123,19 @@ public final class BoardFrame extends JFrame implements KeyListener {
         }
 
         updateScores();
+
+        if (Server.isRunning()) {
+            var connection = Network.getPlayerConnection();
+            if (connection != null)
+                connection.send(
+                        new S2CGridUpdatePacket(
+                                board.getRawBoard(),
+                                scoreLabel.getText(),
+                                statusLabel.getText(),
+                                "X", "Y"
+                        )
+                );
+        }
     }
 
     public void updateScores() {
@@ -152,5 +168,13 @@ public final class BoardFrame extends JFrame implements KeyListener {
             Game.getBoard().endGame();
             Game.getMainMenuFrame().setVisible(true);
         }
+    }
+
+    public void showMenu() {
+        SwingUtilities.invokeLater(() -> {
+            Game.getHostServerFrame().setVisible(false);
+            Game.getMenuFrame().setVisible(false);
+            setVisible(true);
+        });
     }
 }

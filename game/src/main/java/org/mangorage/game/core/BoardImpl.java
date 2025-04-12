@@ -29,6 +29,10 @@ public final class BoardImpl implements Board {
         return board[position];
     }
 
+    public int[] getRawBoard() {
+        return board;
+    }
+
     public String[] getBoard() {
         String[] boardRepresentation = new String[9];
 
@@ -59,7 +63,11 @@ public final class BoardImpl implements Board {
         return Game.getPlayerSet().getActivePlayer();
     }
 
-    public Result setPosition(Player player, int position) {
+    public Result setPosition(final Player player, final int position) {
+
+        System.out.println(player);
+        System.out.println(position);
+
         if (isGameOver()) return Result.GAME_OVER;
         if (Game.getPlayerSet().getActivePlayer() == player) {
             if (board[position] != 0) return Result.TRY_AGAIN;
@@ -99,10 +107,10 @@ public final class BoardImpl implements Board {
         this.gameOver = true;
     }
 
-    public void update(boolean checkWinner) {
+    public void update(final boolean checkWinner) {
         if (isGameOver()) return;
         if (checkWinner) {
-            var winner = findWinner();
+            final var winner = findWinner();
             if (winner != null)
                 Scoreboard.INSTANCE.addScore(winner);
             if (gameOver)
