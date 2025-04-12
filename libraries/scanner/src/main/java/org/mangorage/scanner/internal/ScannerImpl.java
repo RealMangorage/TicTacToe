@@ -14,37 +14,57 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class ScannerImpl implements Scanner {
-    private final Map<ClassLoader, List<Path>> paths_per_loader;
-    private final ScanCache cache = new ScanCache(new ArrayList<>(), new ArrayList<>());
+    private final Map<ClassLoader, List<Path>> paths;
+    private final ScanCache cache = ScanCache.createSync();
 
 
-    ScannerImpl(final Map<ClassLoader, List<Path>> paths_per_loader) {
+    ScannerImpl(final Map<ClassLoader, List<Path>> paths) {
         final Map<ClassLoader, List<Path>> map = new HashMap<>();
 
-        paths_per_loader.forEach((k, v) -> {
+        paths.forEach((k, v) -> {
             map.put(k, List.copyOf(v));
         });
 
-        this.paths_per_loader = Map.copyOf(map);
+        this.paths = Map.copyOf(map);
     }
 
     @Override
     public void commitScan() {
-        paths_per_loader.forEach((k, v) -> {
-            for (final Path path : v) {
-                ScannerUtil.scanPath(cache, path, k);
-            }
-        });
+        var initial = System.currentTimeMillis();
+        List<Runnable> tasks = new CopyOnWriteArrayList<>();
+        paths.entrySet()
+                .stream()
+                .parallel()
+                .forEach(set -> {
+                    final var cl = set.getKey();
+                    set.getValue()
+                            .stream()
+                            .parallel()
+                            .forEach(path -> {
+                                tasks.add(() -> ScannerUtil.scanPath(cache, path, cl));
+                            });
+                });
+
+        // Stage 1
+        ScannerUtil.executeTasks(tasks);
+
+        // Stage 2
+        ScannerUtil.executeTasks();
+
+        var total = System.currentTimeMillis() - initial;
+        System.out.println("Took %s ms".formatted(total));
     }
 
     @Override
     public List<Class<?>> findClassesWithAnnotation(final Class<? extends Annotation> annotation) {
         return cache.classes()
                 .stream()
+                .parallel()
                 .filter(clz -> clz.isAnnotationPresent(annotation))
                 .toList();
     }
@@ -53,6 +73,7 @@ public final class ScannerImpl implements Scanner {
     public List<Class<?>> findClassesWithPredicate(final Predicate<Class<?>> predicate) {
         return cache.classes()
                 .stream()
+                .parallel()
                 .filter(predicate)
                 .toList();
     }
@@ -61,6 +82,7 @@ public final class ScannerImpl implements Scanner {
     public Stream<Resource> findResource(final Predicate<String> predicate) {
         return cache.data()
                 .stream()
+                .parallel()
                 .filter(resource -> predicate.test(resource.path()))
                 .map(UnbakedResource::bake);
     }

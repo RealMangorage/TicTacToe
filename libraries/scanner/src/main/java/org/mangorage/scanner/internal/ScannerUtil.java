@@ -3,11 +3,39 @@ package org.mangorage.scanner.internal;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
 public final class ScannerUtil {
+    private static final ExecutorService service = Executors.newCachedThreadPool();
+
+    private static final List<Runnable> tasks = new CopyOnWriteArrayList<>();
+
+    static void scheduleTask(Runnable runnable) {
+        tasks.add(runnable);
+    }
+
+    static void executeTasks() {
+        executeTasks(tasks);
+    }
+
+    static void executeTasks(List<Runnable> tasks) {
+        tasks
+                .stream()
+                .parallel()
+                .map(service::submit)
+                .forEach(task -> {
+                    try {
+                        task.get();
+                    } catch (Throwable ignored) {}
+                });
+
+        tasks.clear(); // cleanup, assuming tasks are one-shot
+    }
 
     static void scanPath(final ScanCache cache, final Path path, final ClassLoader classLoader) {
         if (Files.isDirectory(path)) {
@@ -22,26 +50,39 @@ public final class ScannerUtil {
 
     // Method to scan a directory for .class files
     // Only needed in Dev Mode...
+    // Method to scan a directory for .class files
     static void scanDirectoryForClasses(final ScanCache cache, final Path directory, final ClassLoader loader) {
-        try (var walk = Files.walk(directory)) {
-            var paths = walk
+        try (Stream<Path> walk = Files.walk(directory)) {
+            walk
+                    .parallel()  // Parallelize the stream processing
                     .filter(Files::isRegularFile)
-                    .toArray(Path[]::new);
-            for (Path path : paths) {
-                handleClass(cache, path, loader);
-            }
-        } catch (IOException ignored) {}
+                    .forEach(path -> scheduleTask(() -> {
+                        try {
+                            handleClass(cache, path, loader);
+                        } catch (Exception e) {
+                            System.err.println("Error handling file: " + path);
+                        }
+                    }));
+        } catch (IOException e) {
+            System.err.println("Error walking directory: " + directory);
+        }
     }
 
     // Method to scan a JAR file for .class files
     static void scanJarForClasses(final ScanCache cache, final Path jar, final ClassLoader classLoader) {
         try (ZipFile zipFile = new ZipFile(jar.toFile())) {
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                handleClass(cache, entry.getName(), classLoader);
-            }
-        } catch (IOException ignored) {}
+            zipFile.entries()
+                    .asIterator()
+                    .forEachRemaining(entry -> scheduleTask(() -> {
+                        try {
+                            handleClass(cache, entry.getName(), classLoader);
+                        } catch (Throwable e) {
+                            System.err.println("Error handling class: " + entry.getName());
+                        }
+                    }));
+        } catch (IOException e) {
+            System.err.println("Error reading JAR file: " + jar);
+        }
     }
 
     // Do any extra checks here, as its directory, and not in a jar...
@@ -62,7 +103,6 @@ public final class ScannerUtil {
                     )
             );
         } catch (Throwable ignored) {
-            System.out.println(path);
             cache.data().add(
                     new UnbakedResource(loader, formatPath(path, false))
             );
