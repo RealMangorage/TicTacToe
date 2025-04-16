@@ -23,4 +23,5 @@ include 'mods:examplemod'
 
 // Other
 findProject(':libraries:networking')?.name = 'networking'
+include 'movie'
 
